@@ -5,11 +5,12 @@ LIBS =  -lncurses
 
 all: ${TARGET}
 
-${TARGET}:main.o
-	${CC} main.o -o ${TARGET} ${LIBS}
+${TARGET}:cli.o msg_parser.o
+	${CC} cli.o msg_parser.o -o ${TARGET} ${LIBS}
 
-main.o: main.c
-	${CC} ${CFLAGS} main.c
-
+cli.o: cli.c
+	${CC} ${CFLAGS} cli.c
+msg_parser.o: msg_parser.c
+	${CC} ${CFLAGS} msg_parser.c
 clean:
 	rm -f *.o
