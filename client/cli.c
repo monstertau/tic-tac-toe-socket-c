@@ -8,7 +8,7 @@
 #include "msg_parser.h"
 
 #define SERVER_ADDR "127.0.0.1"
-#define SERVER_PORT 8080
+#define SERVER_PORT 8081
 #define BUFF_SIZE 1024
 
 int main() {

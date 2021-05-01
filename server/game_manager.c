@@ -39,7 +39,9 @@ void freeGame(int code, GameManager *manager) {
 
     pthread_mutex_unlock(&manager->managerMutex);
 }
-
+/* main handling the game board. first the player 1 will call pthread_cond_wait() to wait for the player 2 to join.
+ * If player 2 has joined, player 2 will signal to the thread and the thread will check if the player
+ * 2 has joined this room. If 2 player has joined, the thread will start to handle the game*/
 void *handleGameBoard(void *arguments) {
     if (pthread_detach(pthread_self())) {
         printf("[-] pthread_detach error\n");
@@ -63,7 +65,7 @@ void *handleGameBoard(void *arguments) {
         send(gameBoard->playerList[i]->sockfd, "status~1~start playing", strlen("status~1~start playing"),
              0); // TODO: generalize this
     }
-
+    // check if is playable, then send the update command and moving command to corresponding client
     while (isPlayable(gameBoard)) {
         for (int i = 0; i < MAX_PLAYER; i++) {
             char label = gameBoard->playerList[i % 2]->label;
@@ -92,11 +94,11 @@ void *handleGameBoard(void *arguments) {
         }
     }
 
-
     freeGame(gameBoard->roomID, manager);
     pthread_exit(NULL);
 }
 
+/* Get free room and assign new game to that index and create new thread to handling that gameboard, else return -1 */
 int getFreeRoom(GameManager *manager, int size, char *name, int sockfd) {
     pthread_mutex_lock(&manager->managerMutex);
     int j = -1;
@@ -120,6 +122,9 @@ int getFreeRoom(GameManager *manager, int size, char *name, int sockfd) {
     return j;
 }
 
+/* request join room if room code is incorrect return -1, if the room is full return -2,
+ * if success assign player to that gameboard, and broadcast to thread that wait for player 2
+ * that the player 2 has joined */
 int requestJoinRoom(int code, char *name, int sockfd, GameManager *manager) {
     pthread_mutex_lock(&manager->managerMutex);
     int j = -1;

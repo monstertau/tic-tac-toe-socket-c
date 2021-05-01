@@ -18,7 +18,7 @@
 #include "game_manager.h"
 #include "msg_parser.h"
 
-#define PORT 8080
+#define PORT 8081
 #define BACKLOG 36
 #define BUFF_SIZE 1024
 typedef struct arg_struct {
@@ -30,6 +30,9 @@ void sendToClient(int sockfd, char *msg) {
     send(sockfd, msg, strlen(msg), 0);
 }
 
+
+/* Main handling thread when a new socket is connected to the server. Til now
+ * only build the CREATE and JOIN command, for any other command will be UNRECOGNIZED */
 void *roomManagement(void *arguments) {
     if (pthread_detach(pthread_self())) {
         printf("[-] pthread_detach error\n");
@@ -55,8 +58,9 @@ void *roomManagement(void *arguments) {
     }
 
 
-    // get cmd array
+    // parse buffer to command array with character ~ between each
     char **cmdArr = parseCmd(buff);
+    // get command from each command array
     CmdValue cmdValue = getCommand(cmdArr);
     int code;
     switch (cmdValue.type) {
@@ -106,7 +110,7 @@ void *roomManagement(void *arguments) {
 
 // START GAME SERVER HERE
 int main() {
-    /*  set rand num*/
+    /*  set rand num for room code generation - need to modify the room generation code */
     srand(time(NULL));
 
     /* INIT SOCKET SERVER */
@@ -136,6 +140,7 @@ int main() {
     pthread_t tid;
 
     /* INIT GAME MANAGER */
+
     GameManager *manager = newGameManager();
 
 
