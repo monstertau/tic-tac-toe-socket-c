@@ -5,11 +5,13 @@
 #include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "msg_parser.h"
 
 #define SERVER_ADDR "127.0.0.1"
 #define SERVER_PORT 8081
 #define BUFF_SIZE 1024
+void handleContinue(int sock);
 
 int main() {
     int client_sock;
@@ -124,6 +126,12 @@ int main() {
                 send(client_sock, "1", strlen("1"), 0); // send success update table
                 break;
             case DONE:
+                if(cmdValue.doneCmd.is_winner)
+                    printf("[+] Congratulation! You are the winner!!\n");
+                else
+                    printf("[+] You are the loser!! The winner is %s\n", cmdValue.doneCmd.winner);
+                //TODO: send yes or no
+                handleContinue(client_sock);
                 break;
             default:
                 break;
@@ -138,4 +146,16 @@ int main() {
         printf("[-] Connection closed.\n");
     close(client_sock);
     return 0;
+}
+
+void handleContinue(int sock){
+    char cmd;
+    printf("Do you want to continue [y/n]: ");
+    scanf(" %c", &cmd);
+    if(cmd != 'y' && cmd != 'Y'){
+        send(sock, "0", strlen("0"), 0);
+        printf("Thank you for playing\n");
+    } else {
+        send(sock, "1", strlen("1"), 0);   
+    }
 }

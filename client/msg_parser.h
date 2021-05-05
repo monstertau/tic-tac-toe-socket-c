@@ -1,7 +1,7 @@
 //
 // Created by monstertau on 25/04/2021.
 //
-
+#include <stdbool.h>
 #ifndef SERVER_MSG_PARSER_H
 #define SERVER_MSG_PARSER_H
 #define MAXCMDLENGTH 512
@@ -39,7 +39,7 @@ typedef struct UpdateCmd_ {
 
 typedef struct DoneCmd_ {
     char winner[MAXMSG];
-    char label;
+    bool is_winner;
 } DoneCmd;
 
 typedef struct CmdValue_ {

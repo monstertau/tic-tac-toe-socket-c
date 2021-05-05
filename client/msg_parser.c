@@ -94,5 +94,7 @@ MovingCmd newMovingCommand(char **cmdArr) {
 DoneCmd newDoneCommand(char **cmdArr) {
     //TODO
     DoneCmd doneCmd;
+    doneCmd.is_winner = (strcmp(cmdArr[1],"1") == 0);
+    strcpy(doneCmd.winner,cmdArr[2]);
     return doneCmd;
 }

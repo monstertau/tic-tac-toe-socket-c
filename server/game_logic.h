@@ -47,6 +47,9 @@ Player *newPlayer(int sockfd, char *name, bool isTurned, char label);
 
 GameBoard *newGameBoard(Player *player1, int size);
 
+void remakeGameBroad(GameBoard *gameBoard);
+
+bool isWin(GameBoard *gameBoard, Move *move, char label);
 
 void addPlayer2(GameBoard *gameBoard, Player *player2);
 
