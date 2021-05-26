@@ -18,7 +18,7 @@
 #include "game_manager.h"
 #include "msg_parser.h"
 
-#define PORT 8081
+#define PORT 8080
 #define BACKLOG 36
 #define BUFF_SIZE 1024
 typedef struct arg_struct {
@@ -109,15 +109,26 @@ void *roomManagement(void *arguments) {
 
 
 // START GAME SERVER HERE
-int main() {
+int main(int argc, char **argv) {
     /*  set rand num for room code generation - need to modify the room generation code */
     srand(time(NULL));
 
     /* INIT SOCKET SERVER */
 
-    int server_sock; /* file descriptors */
+    int server_sock, port; /* file descriptors */
     struct sockaddr_in server;    /* server's address information */
     struct sockaddr_in client;    /* client's address information */
+
+
+    if (argc != 2) {
+        printf("Error Usage: run application with a port argument");
+        exit(1);
+    }
+    port = strtol(argv[1], NULL, 10);
+    if (port <= 0) {
+        printf("Error Usage: port must be int > 0");
+        exit(1);
+    }
 
     if ((server_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) { /* calls socket() */
         printf("[-] socket() error\n");
@@ -126,13 +137,14 @@ int main() {
 
     bzero(&server, sizeof(server));
     server.sin_family = AF_INET;
-    server.sin_port = htons(PORT);
+    server.sin_port = htons(port);
     server.sin_addr.s_addr = htonl(INADDR_ANY); /* INADDR_ANY puts your IP address automatically */
 
     if (bind(server_sock, (struct sockaddr *) &server, sizeof(server)) == -1) {
         perror("\n[-]Error: ");
         return 0;
     }
+    printf("[+] Server is running at port %d\n", port);
     if (listen(server_sock, BACKLOG) == -1) {
         perror("\n[-]Error: ");
         return 0;

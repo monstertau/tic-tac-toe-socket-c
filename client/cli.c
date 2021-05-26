@@ -11,6 +11,7 @@
 #define SERVER_ADDR "127.0.0.1"
 #define SERVER_PORT 8081
 #define BUFF_SIZE 1024
+
 void handleContinue(int sock);
 
 int main() {
@@ -48,6 +49,7 @@ int main() {
     scanf("%d", &c);
     getchar();
     char name[BUFF_SIZE];
+    int boardSize = 3;
     char roomCode[BUFF_SIZE];
     int roomCodeInt = 0;
     switch (c) {
@@ -59,8 +61,11 @@ int main() {
             memset(name, '\0', BUFF_SIZE);
             fgets(name, BUFF_SIZE, stdin);
             name[strcspn(name, "\n")] = '\0';
+
+            printf("\nEnter board size:");
+            scanf("%d", &boardSize);
             strcat(buff, name);
-            strcat(buff, "~3");
+            sprintf(buff, "%s~%d", buff, boardSize);
             break;
         case 2:
             memset(buff, '\0', BUFF_SIZE);
@@ -111,6 +116,10 @@ int main() {
                 }
                 break;
             case MOVING:
+                printf("Enter x location:");
+                scanf("%d", &cmdValue.movingCmd.x);
+                printf("Enter y location:");
+                scanf("%d", &cmdValue.movingCmd.y);
                 sprintf(msg, "%d~%d", cmdValue.movingCmd.x, cmdValue.movingCmd.y);
                 send(client_sock, msg, strlen(msg), 0);
                 break;
@@ -126,7 +135,7 @@ int main() {
                 send(client_sock, "1", strlen("1"), 0); // send success update table
                 break;
             case DONE:
-                if(cmdValue.doneCmd.is_winner)
+                if (cmdValue.doneCmd.is_winner)
                     printf("[+] Congratulation! You are the winner!!\n");
                 else
                     printf("[+] You are the loser!! The winner is %s\n", cmdValue.doneCmd.winner);
@@ -148,14 +157,14 @@ int main() {
     return 0;
 }
 
-void handleContinue(int sock){
+void handleContinue(int sock) {
     char cmd;
     printf("Do you want to continue [y/n]: ");
     scanf(" %c", &cmd);
-    if(cmd != 'y' && cmd != 'Y'){
+    if (cmd != 'y' && cmd != 'Y') {
         send(sock, "0", strlen("0"), 0);
         printf("Thank you for playing\n");
     } else {
-        send(sock, "1", strlen("1"), 0);   
+        send(sock, "1", strlen("1"), 0);
     }
 }

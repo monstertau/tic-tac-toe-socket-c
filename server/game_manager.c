@@ -80,19 +80,18 @@ void *handleGameBoard(void *arguments)
     pthread_mutex_unlock(&gameBoard->gameMutex);
 
     // SEND START PLAYING TO CLIENT
-    sleep(1);
+    sleep(2);
     for (int i = 0; i < MAX_PLAYER; i++)
     {
         send(gameBoard->playerList[i]->sockfd, "status~1~start playing", strlen("status~1~start playing"),
              0); // TODO: generalize this
     }
     // check if is playable, then send the update command and moving command to corresponding client
-    sleep(0.5);
+    usleep(500);
     while (1)
     {
         if (isPlayable(gameBoard))
         {
-            printf("herrrrrrrreee\n");
             int concount = 0;
             int dropPlayer;
             for (int i = 0; i < MAX_PLAYER; i++)
@@ -146,9 +145,11 @@ void *handleGameBoard(void *arguments)
             handleGameOut(status, gameBoard, i);
             char buff[BUFF_SIZE];
             status = recv(gameBoard->playerList[i]->sockfd, buff, BUFF_SIZE, 0);
+            printf("done1\n");
             //TODO: handle if a client out of game
             handleGameOut(status, gameBoard, i);
         }
+        printf("done\n");
         for (int i = 0; i < MAX_PLAYER; i++)
         {
             // if (getWinner(gameBoard)){

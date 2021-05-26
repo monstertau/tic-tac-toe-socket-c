@@ -84,10 +84,6 @@ UpdateCmd newUpdateCommand(char **cmdArr) {
 MovingCmd newMovingCommand(char **cmdArr) {
     //TODO
     MovingCmd movingCmd;
-    printf("Enter x location:");
-    scanf("%d", &movingCmd.x);
-    printf("Enter y location:");
-    scanf("%d", &movingCmd.y);
     return movingCmd;
 }
 
