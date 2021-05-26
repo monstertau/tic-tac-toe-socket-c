@@ -131,8 +131,7 @@ void setSystemMessage(GameScreen *screen, char *msg) {
     setNormalTitle(screen);
     delwin(screen->systemWin);
     screen->systemWin = newSystemWindow(screen->xMax, screen->yMax, true);
-    int yMax, xMax;
-    getmaxyx(screen->systemWin, yMax, xMax);
+    int yMax = getmaxy(screen->systemWin);
     mvwprintw(screen->systemWin, yMax / 2, 2, msg);
     wrefresh(screen->systemWin);
 }
@@ -141,8 +140,7 @@ void setSystemMessage(GameScreen *screen, char *msg) {
 void setLabelMessage(GameScreen *screen, char label, char opLabel) {
     delwin(screen->labelWin);
     screen->labelWin = newLabelWindow(screen->xMax, screen->yMax, false);
-    int yMax, xMax;
-    getmaxyx(screen->labelWin, yMax, xMax);
+    int yMax = getmaxy(screen->labelWin);
     mvwprintw(screen->labelWin, yMax / 2, 2, "Your Label: %c      Opponent's Label: %c", label, opLabel);
     wrefresh(screen->labelWin);
 }
@@ -247,8 +245,7 @@ int movingGameWindow(GameBoardInfo *gameBoardInfo, GameScreen *gameScreen, GameI
 
 void drawChatDialog(GameScreen *gameScreen) {
     ChatMessage *chatMsg = chatMessageHead;
-    int x, y;
-    getmaxyx(gameScreen->chatWin, y, x);
+    int y = getmaxy(gameScreen->chatWin);
     int i = 0;
     while (1) {
         if (chatMsg == NULL) {
@@ -309,4 +306,99 @@ WINDOW *newDialogWindow(char *title, int *xMax, int *yMax) {
     getmaxyx(window, *yMax, *xMax);
     mvwprintw(window, 0, *xMax / 2 - strlen(title) / 2, title);
     return window;
+}
+
+char *inputNewBox(char *title, char *label) {
+    char *input = malloc(sizeof(char) * 40);
+    memset(input, 0, 40);
+    int yMax = 0, xMax = 0;
+    erase();
+    noecho();
+    curs_set(1);
+    int yTitle, xTitle;
+    int c;
+    int i = 0;
+    while (1) {
+
+        WINDOW *gameWin = newDialogWindow(title, &xMax, &yMax);
+        mvwprintw(gameWin, 5, xMax / 2 - strlen(label), label);
+        getyx(gameWin, yTitle, xTitle);
+        wprintw(gameWin, "%s", input);
+        c = wgetch(gameWin);
+        switch (c) {
+            case KEY_BACKSPACE:
+                getyx(gameWin, yMax, xMax);
+                if (xMax > xTitle || yMax > yTitle) {
+                    input[--i] = '\0';
+                }
+                break;
+            case 10:
+                break;
+            default:
+                if (i < 39) {
+                    input[i++] = c;
+                }
+                break;
+        }
+        if (c == 10) {
+            delwin(gameWin);
+            break;
+        }
+        wrefresh(gameWin);
+    }
+    input[i] = '\0';
+
+    return input;
+}
+
+WINDOW *newStatusWindow(char *title, char *label, bool isError) {
+    erase();
+    noecho();
+    curs_set(1);
+    int xMax, yMax;
+    char tmpLabel[MAX_MSG_LEN] = {0};
+    WINDOW *gameWin = newDialogWindow(title, &xMax, &yMax);
+    if (isError) {
+        sprintf(tmpLabel, "%s.Press Enter To Continue...", label);
+        mvwprintw(gameWin, getmaxy(gameWin) / 2, (getmaxx(gameWin) - strlen(tmpLabel)) / 2, tmpLabel);
+    } else {
+        sprintf(tmpLabel, "%s.Waiting For Player...", label);
+        mvwprintw(gameWin, getmaxy(gameWin) / 2, (getmaxx(gameWin) - strlen(tmpLabel)) / 2, tmpLabel);
+    }
+    wrefresh(gameWin);
+    return gameWin;
+}
+
+void newMenuWindow(int *choice, int *xMax, int *yMax) {
+    WINDOW *menuWin = newDialogWindow(MENU_TITLE, xMax, yMax);
+    char choices[MAX_MENU][40] = {"Start A New Game", "Join An Existing Game", "Game's Rule", "Exit"};
+    while (1) {
+        for (int i = 0; i < MAX_MENU; i++) {
+            if (*choice == i) {
+                wattron(menuWin, A_REVERSE);
+            }
+            mvwprintw(menuWin, i + 5, *xMax / 2 - strlen(choices[i]) / 2, choices[i]);
+            wattroff(menuWin, A_REVERSE);
+        }
+        int key = wgetch(menuWin);
+        switch (key) {
+            case KEY_UP:
+                *choice = *choice - 1;
+                if (*choice == -1)
+                    *choice = 0;
+                break;
+            case KEY_DOWN:
+                *choice = *choice + 1;
+                if (*choice > MAX_MENU - 1)
+                    *choice = MAX_MENU - 1;
+                break;
+            default:
+                break;
+        }
+        if (key == 10) {
+            // Enter key stroke
+            delwin(menuWin);
+            break;
+        }
+    }
 }

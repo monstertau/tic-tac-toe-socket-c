@@ -22,7 +22,7 @@ typedef enum {
     UNRECOGNIZED_STT
 } Status;
 typedef struct StatusCmd_ {
-    char message[1024];
+    char message[512];
     int gameCode;
     Status status;
 } StatusCmd;

@@ -16,7 +16,8 @@
 #define LABEL_TITLE " Labels "
 #define COMMAND_TITLE " Game Board "
 #define MAX_BOARD_SIZE 16
-
+#define MAX_MENU 4
+#define MENU_TITLE " Tic Tac Toe Online Game "
 
 typedef struct GameScreen_ {
     int xMax, yMax;
@@ -100,3 +101,9 @@ void drawChatDialog(GameScreen *gameScreen);
 int movingChatWindow(GameScreen *gameScreen, char *msg, int *i);
 
 WINDOW *newDialogWindow(char *title, int *xMax, int *yMax);
+
+void newMenuWindow(int *choice, int *xMax, int *yMax);
+
+WINDOW *newStatusWindow(char *title, char *label, bool isError);
+
+char *inputNewBox(char *title, char *label);
