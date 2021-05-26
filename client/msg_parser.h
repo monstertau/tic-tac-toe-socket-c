@@ -2,6 +2,7 @@
 // Created by monstertau on 25/04/2021.
 //
 #include <stdbool.h>
+
 #ifndef SERVER_MSG_PARSER_H
 #define SERVER_MSG_PARSER_H
 #define MAXCMDLENGTH 512
@@ -22,6 +23,7 @@ typedef enum {
 } Status;
 typedef struct StatusCmd_ {
     char message[1024];
+    int gameCode;
     Status status;
 } StatusCmd;
 

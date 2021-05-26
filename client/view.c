@@ -7,13 +7,6 @@
 #include <unistd.h>
 #include "view.h"
 
-#define MAX_MSG_LEN 100
-#define GAME_TITLE " Game Board "
-#define SYSTEM_TITLE " System Message "
-#define CHAT_TITLE " Chat "
-#define LABEL_TITLE " Labels "
-#define COMMAND_TITLE " Game Board "
-
 ChatInfo chatInfo;
 ChatMessage *chatMessageHead = NULL;
 
@@ -151,6 +144,7 @@ void setLabelMessage(GameScreen *screen, char label, char opLabel) {
     int yMax, xMax;
     getmaxyx(screen->labelWin, yMax, xMax);
     mvwprintw(screen->labelWin, yMax / 2, 2, "Your Label: %c      Opponent's Label: %c", label, opLabel);
+    wrefresh(screen->labelWin);
 }
 
 GameBoardInfo drawGameBoard(GameScreen *screen, char board[MAX_BOARD_SIZE][MAX_BOARD_SIZE], int gameSize) {
@@ -205,22 +199,8 @@ void setNormalTitle(GameScreen *screen) {
     refreshView(screen);
 }
 
-WINDOW *newDialogWindow(char *title, int *xMax, int *yMax) {
-    erase();
-    getmaxyx(stdscr, *yMax, *xMax);
-    WINDOW *window = newwin(*yMax / 2, *xMax / 2, *yMax / 4, *xMax / 4);
-    box(window, 0, 0);
-    refresh();
-    wrefresh(window);
-    keypad(window, true);
-    getmaxyx(window, *yMax, *xMax);
-    wattron(window, A_REVERSE);
-    mvwprintw(window, 0, *xMax / 2 - strlen(title) / 2, title);
-    wattroff(window, A_REVERSE);
-    return window;
-}
 
-int movingGameWindow(GameBoardInfo *gameBoardInfo, GameScreen *gameScreen) {
+int movingGameWindow(GameBoardInfo *gameBoardInfo, GameScreen *gameScreen, GameInfo *gameInfo) {
     setNormalTitle(gameScreen);
     drawLightTitle(gameScreen->gameWin, GAME_TITLE);
     wmove(gameScreen->gameWin, gameBoardInfo->yCur, gameBoardInfo->xCur);
@@ -255,7 +235,8 @@ int movingGameWindow(GameBoardInfo *gameBoardInfo, GameScreen *gameScreen) {
             wmove(gameScreen->gameWin, gameBoardInfo->yCur, gameBoardInfo->xCur);
             break;
         case ' ': // send msg
-            mvwprintw(gameScreen->gameWin, gameBoardInfo->yCur, gameBoardInfo->xCur, "X");
+            gameInfo->lastY = (gameBoardInfo->xCur - 2 - (gameBoardInfo->xMax - gameBoardInfo->xBoard) / 2) / 5;
+            gameInfo->lastX = (gameBoardInfo->yCur - 1 - (gameBoardInfo->yMax - gameBoardInfo->yBoard) / 2) / 3;
             break;
         default:
             break;
@@ -317,52 +298,15 @@ int movingChatWindow(GameScreen *gameScreen, char *msg, int *i) {
     return c;
 }
 
-int main() {
-
-    initscr();
-    cbreak();
-    curs_set(1);
-    noecho();
-
-    int yMax, xMax;
-    getmaxyx(stdscr, yMax, xMax);
-    keypad(stdscr, true);
-    GameScreen *gameScreen = newGameScreen(xMax, yMax);
+WINDOW *newDialogWindow(char *title, int *xMax, int *yMax) {
+    erase();
+    getmaxyx(stdscr, *yMax, *xMax);
+    WINDOW *window = newwin(*yMax / 2, *xMax / 2, *yMax / 4, *xMax / 4);
+    box(window, 0, 0);
     refresh();
-    refreshView(gameScreen);
-
-    setSystemMessage(gameScreen, "[+] Initialize Game board");
-
-
-    char board[MAX_BOARD_SIZE][MAX_BOARD_SIZE] = {{'-', '-', '-', '-', '-'},
-                                                  {'-', '-', '-', '-', '-'},
-                                                  {'X', '-', '-', '-', '-'},
-                                                  {'-', '-', '-', '-', '-'},
-                                                  {'-', '-', '-', '-', '-'},
-    };
-    GameBoardInfo gameBoardInfo = drawGameBoard(gameScreen, board, 5);
-    char *msg = malloc(sizeof(char) * MAX_MSG_LEN);
-    memset(msg, 0, MAX_MSG_LEN);
-    int i = 0;
-    int tab = 0;
-    while (1) {
-        if (tab == 0) {
-            int key = movingGameWindow(&gameBoardInfo, gameScreen);
-            if (key == 27) {
-                break;
-            }
-            if (key == 9) {
-                tab = 1;
-            }
-        } else {
-            int key = movingChatWindow(gameScreen, msg, &i);
-            if (key == 9) {
-                tab = 0;
-            }
-        }
-
-    }
-
-
-    endwin();
+    wrefresh(window);
+    keypad(window, true);
+    getmaxyx(window, *yMax, *xMax);
+    mvwprintw(window, 0, *xMax / 2 - strlen(title) / 2, title);
+    return window;
 }

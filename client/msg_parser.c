@@ -63,6 +63,9 @@ StatusCmd newStatusCommand(char **cmdArr) {
         return statusCmd;
     }
     strcpy(statusCmd.message, cmdArr[2]);
+    if (strlen(cmdArr[3]) != 0) {
+        statusCmd.gameCode = strtol(cmdArr[3], NULL, 10);
+    }
     return statusCmd;
 }
 
@@ -90,7 +93,7 @@ MovingCmd newMovingCommand(char **cmdArr) {
 DoneCmd newDoneCommand(char **cmdArr) {
     //TODO
     DoneCmd doneCmd;
-    doneCmd.is_winner = (strcmp(cmdArr[1],"1") == 0);
-    strcpy(doneCmd.winner,cmdArr[2]);
+    doneCmd.is_winner = (strcmp(cmdArr[1], "1") == 0);
+    strcpy(doneCmd.winner, cmdArr[2]);
     return doneCmd;
 }
