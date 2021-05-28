@@ -196,6 +196,18 @@ void *handleGameBoard(void *arguments) {
                 gameBoard->playerList[i] = NULL;
             }
         }
+        // broadcast to watcher 
+        for(int i=0; i < MAX_WATCHER; i++){
+            char *sendBoard = serializeBoard('-','-',gameBoard->size,gameBoard->board);
+            if(gameBoard->watcherList[i] != NULL){
+                status = send(gameBoard->watcherList[i]->sockfd,sendBoard,strlen(sendBoard), MSG_NOSIGNAL);
+                if(status <= 0){
+                    freePlayer(gameBoard->watcherList[i]);
+                    gameBoard->watcherList[i] = NULL;
+                }
+            }
+        }
+
         if (checkDisconnectedStatus(gameBoard, manager)) {
             continue;
         }
@@ -322,3 +334,22 @@ int requestJoinRoom(int code, char *name, int sockfd, GameManager *manager) {
     return j;
 }
 
+int requestWatchRoom(int code,char* name, int sockfd, GameManager *manager){
+    int j = -1;
+    for (int i = 0; i < MAX_ROOM; i++) {
+        if(manager->RoomGameList[i] == NULL || manager->RoomGameList[i]->roomID != code)
+            continue;
+        if(getNumWatcher(manager->RoomGameList[i]) >= MAX_WATCHER){
+            j = -2;
+            break;
+        }
+        GameBoard *gameBoard = manager->RoomGameList[i];
+
+        Player *watcher = newPlayer(sockfd,name,false,' ');
+        addWatcher(gameBoard,watcher);
+
+        j = i;
+        break;
+    }
+    return j;
+}

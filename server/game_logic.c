@@ -67,6 +67,15 @@ void addPlayer(GameBoard *gameBoard, Player *player) {
     }
 }
 
+void addWatcher(GameBoard *gameBoard, Player *player){
+    for(int i=0;i<MAX_WATCHER;i++){
+        if(gameBoard->watcherList[i] == NULL){
+            gameBoard->watcherList[i] = player;
+            break;
+        }
+    }
+}
+
 void makeMove(GameBoard *gameBoard, Move *move, Player *player) {
     int x = move->x;
     int y = move->y;
@@ -146,6 +155,22 @@ bool isPlayable(GameBoard *gameBoard) {
     return (gameBoard->winner == 0);
 }
 
+char *currentBoard(int size, char board[MAX_BOARD_SIZE][MAX_BOARD_SIZE]){
+    char tmp2[MAX_BOARD_SIZE * MAX_BOARD_SIZE] = {0};
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            char boardLabel[2];
+            if (board[i][j] != '\0') {
+                sprintf(boardLabel, "%c", board[i][j]);
+            } else {
+                sprintf(boardLabel, "-");
+            }
+            strcat(tmp2, boardLabel);
+        }
+    }
+    return tmp2;
+}
+
 char *serializeBoard(char label, char opLabel, int size, char board[MAX_BOARD_SIZE][MAX_BOARD_SIZE]) {
     char *buff = (char *) malloc(sizeof(char) * BUFF_SIZE);
     memset(buff, 0, BUFF_SIZE);
@@ -156,8 +181,8 @@ char *serializeBoard(char label, char opLabel, int size, char board[MAX_BOARD_SI
     strcat(buff, tmp);
     strcat(buff, "~");
 
-    char tmp2[MAX_BOARD_SIZE * MAX_BOARD_SIZE];
-    memset(tmp2, 0, MAX_BOARD_SIZE * MAX_BOARD_SIZE);
+    char tmp2[MAX_BOARD_SIZE * MAX_BOARD_SIZE] = {0};
+    // strcpy(tmp2,currentBoard(size,board));
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             char boardLabel[2];
@@ -193,6 +218,15 @@ int getNumPlayer(GameBoard *gameBoard) {
         if (gameBoard->playerList[i] != NULL) {
             j++;
         }
+    }
+    return j;
+}
+
+int getNumWatcher(GameBoard *GameBoard){
+    int j = 0;
+    for(int i = 0; i < MAX_WATCHER; i++ ){
+        if(GameBoard->watcherList[i] != NULL)
+            j++;
     }
     return j;
 }

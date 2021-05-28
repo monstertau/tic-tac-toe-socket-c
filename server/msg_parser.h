@@ -48,3 +48,5 @@ CmdValue getCommand(char **cmdArr);
 CreateCmd newCreateCommand(char **cmdArr);
 
 JoinCmd newJoinCommand(char **cmdArr);
+
+WatchCmd newWatchCommand(char **cmdArr);

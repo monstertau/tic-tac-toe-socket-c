@@ -44,8 +44,9 @@ int main() {
 
     printf("1. CREATE NEW GAME\n");
     printf("2. JOIN GAME\n");
-    printf("3. EXIT\n");
-    printf("Your choice (1-3):");
+    printf("3. WATCH GAME\n");
+    printf("4. EXIT\n");
+    printf("Your choice (1-4):");
     scanf("%d", &c);
     getchar();
     char name[BUFF_SIZE];
@@ -70,6 +71,24 @@ int main() {
         case 2:
             memset(buff, '\0', BUFF_SIZE);
             strcpy(buff, "join");
+            strcat(buff, "~");
+            printf("\nInsert name:");
+
+            memset(name, '\0', BUFF_SIZE);
+            fgets(name, BUFF_SIZE, stdin);
+            name[strcspn(name, "\n")] = '\0';
+            strcat(buff, name);
+            strcat(buff, "~");
+
+            memset(roomCode, '\0', BUFF_SIZE);
+            printf("\nInsert room code:");
+            scanf("%d", &roomCodeInt);
+            sprintf(roomCode, "%d", roomCodeInt);
+            strcat(buff, roomCode);
+            break;
+        case 3:
+            memset(buff, '\0', BUFF_SIZE);
+            strcpy(buff, "watch");
             strcat(buff, "~");
             printf("\nInsert name:");
 

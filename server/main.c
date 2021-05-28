@@ -95,6 +95,25 @@ void *roomManagement(void *arguments) {
             sendToClient(client_sock, "status~1~Join room successfully");
             break;
         case WATCH:
+            code = requestWatchRoom(cmdValue.watchCmd.roomCode,cmdValue.watchCmd.name, client_sock, manager);
+            if(code == -1){
+                printf("[ROOM_MANAGEMENT] [WARN] Wrong Room Code! sockfd = %d\n", client_sock);
+                sendToClient(client_sock, "status~0~Wrong Room Code");
+                destroyCmd(cmdArr);
+                close(client_sock);
+                pthread_exit(NULL);
+            } else if(code == -2){
+                printf("[ROOM_MANAGEMENT] [WARN] Room is full! sockfd = %d\n", client_sock);
+                sendToClient(client_sock, "status~0~Room is full");
+                destroyCmd(cmdArr);
+                close(client_sock);
+                pthread_exit(NULL);
+            }
+            sendToClient(client_sock,"status~1~Watch room successfully");
+            sleep(0.5);
+            GameBoard *gameBoard = manager->RoomGameList[code];
+            char *sendBoard = serializeBoard('-','-',gameBoard->size,gameBoard->board);
+            int status = send(client_sock, sendBoard, strlen(sendBoard), MSG_NOSIGNAL);
             break;
         default:
             printf("[ROOM_MANAGEMENT] [WARN] Unrecognized command %s\n", cmdArr[0]);

@@ -45,9 +45,7 @@ CmdValue getCommand(char **cmdArr) {
         cmdValue.joinCmd = newJoinCommand(cmdArr);
     } else if (strcmp(cmdArr[0], "watch") == 0) {
         cmdValue.type = WATCH;
-
-        WatchCmd watchCmd;
-        cmdValue.watchCmd = watchCmd;
+        cmdValue.watchCmd = newWatchCommand(cmdArr);
     } else {
         cmdValue.type = UNRECOGNIZED;
     }
@@ -72,4 +70,14 @@ JoinCmd newJoinCommand(char **cmdArr) {
     strcpy(joinCmd.name, name);
     joinCmd.roomCode = code;
     return joinCmd;
+}
+
+WatchCmd newWatchCommand(char **cmdArr){
+    char name[50];
+    strcpy(name, cmdArr[1]);
+    int code = strtol(cmdArr[2], NULL, 10);
+    WatchCmd watchCmd;
+    strcpy(watchCmd.name, name);
+    watchCmd.roomCode = code;
+    return watchCmd;
 }

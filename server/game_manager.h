@@ -23,4 +23,6 @@ int getFreeRoom(GameManager *manager, int size, char *name, int sockfd);
 
 int requestJoinRoom(int code, char *name, int sockfd, GameManager *manager);
 
+int requestWatchRoom(int code,char* name, int sockfd, GameManager *manager);
+
 void joinRoom(int code, char *name, int sockfd, GameManager *manager);

@@ -12,6 +12,7 @@
 
 #define MAX_BOARD_SIZE 16
 #define MAX_PLAYER 2
+#define MAX_WATCHER 5
 #endif //SERVER_GAME_LOGIC_H
 struct Move_ {
     int x;
@@ -35,6 +36,7 @@ struct GameBoard_ {
     int size;
     char board[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
     Player *playerList[MAX_PLAYER];
+    Player *watcherList[MAX_WATCHER];
     char winner;
 };
 typedef struct GameBoard_ GameBoard;
@@ -74,3 +76,9 @@ int getTurnedPlayer(GameBoard *gameBoard);
 Player *getAvailablePlayer(GameBoard *gameBoard);
 
 void printBoard(GameBoard *gameBoard);
+
+int getNumWatcher(GameBoard *GameBoard);
+
+void addWatcher(GameBoard *gameBoard, Player *player);
+
+char *currentBoard(int size, char board[MAX_BOARD_SIZE][MAX_BOARD_SIZE]);
