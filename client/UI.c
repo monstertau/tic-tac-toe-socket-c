@@ -14,7 +14,7 @@
 
 
 #define SERVER_ADDR "127.0.0.1"
-#define SERVER_PORT 8081
+#define SERVER_PORT 8080
 
 #define BUFF_SIZE 1024
 
@@ -61,6 +61,7 @@ void gameHandler(char **cmdArr, int client_sock, GameScreen *gameScreen,
                 sprintf(systemRecvMsg, "[-] Unrecognized status %s", cmdArr[1]);
             }
             setSystemMessage(gameScreen, systemRecvMsg);
+            sleep(2);
             break;
         case MOVING:
             setSystemMessage(gameScreen, "[~] It's Your Turn");
@@ -189,7 +190,7 @@ void joinGameHandler(int client_sock, GameInfo *gameInfo) {
     char *code = NULL;
     int gameCode = 0;
     char buff[BUFF_SIZE + 1];
-    int  bytes_received;
+    int bytes_received;
 
     code = inputNewBox(" Join Existing Game ", "Enter Exist Room Code:");
     gameCode = strtol(code, NULL, 10);
@@ -299,7 +300,7 @@ int main() {
     refresh();
     refreshView(gameScreen);
 
-    GameBoardInfo *gameBoardInfo = (GameBoardInfo *) malloc(sizeof(gameBoardInfo));
+    GameBoardInfo *gameBoardInfo = (GameBoardInfo *) malloc(sizeof(GameBoardInfo));
     while ((bytes_received = recv(client_sock, buff, BUFF_SIZE, 0)) > 0) {
         buff[bytes_received] = '\0';
         char **cmdArr = parseCmd(buff);

@@ -35,7 +35,7 @@ void sendToClient(int sockfd, char *msg) {
  * only build the CREATE and JOIN command, for any other command will be UNRECOGNIZED */
 void *roomManagement(void *arguments) {
     if (pthread_detach(pthread_self())) {
-        printf("[-] pthread_detach error\n");
+        printf("[ROOM_MANAGEMENT] [ERROR] pthread_detach error\n");
     }
     Args *args = (Args *) arguments;
     GameManager *manager = args->manager;
@@ -46,14 +46,14 @@ void *roomManagement(void *arguments) {
     char buff[BUFF_SIZE];
     memset(buff, 0, BUFF_SIZE);
 
-    printf("[+] Created thread for client sock id = %d\n", client_sock);
+    printf("[ROOM_MANAGEMENT] [INFO] Created thread for client sock id = %d\n", client_sock);
     byte_recv = recv(client_sock, buff, BUFF_SIZE, 0);
     if (byte_recv < 0) {
-        perror("[-] Read error");
+        perror("[ROOM_MANAGEMENT] [ERROR] Read error");
         close(client_sock);
         pthread_exit(NULL);
     } else if (byte_recv == 0) {
-        printf("[~] Connection closed.\n");
+        printf("[ROOM_MANAGEMENT] [INFO] Connection closed.\n");
         pthread_exit(NULL);
     }
 
@@ -67,7 +67,7 @@ void *roomManagement(void *arguments) {
         case CREATE:
             code = getFreeRoom(manager, cmdValue.createCmd.boardSize, cmdValue.createCmd.name, client_sock);
             if (code == -1) {
-                printf("[-] Full Room to create! sockfd = %d\n", client_sock);
+                printf("[ROOM_MANAGEMENT] [WARN] Full Room to create! sockfd = %d\n", client_sock);
                 sendToClient(client_sock, "status~0~Full Room to create");
                 destroyCmd(cmdArr);
                 close(client_sock);
@@ -80,13 +80,13 @@ void *roomManagement(void *arguments) {
         case JOIN:
             code = requestJoinRoom(cmdValue.joinCmd.roomCode, cmdValue.joinCmd.name, client_sock, manager);
             if (code == -1) {
-                printf("[-] Wrong Room Code! sockfd = %d\n", client_sock);
+                printf("[ROOM_MANAGEMENT] [WARN] Wrong Room Code! sockfd = %d\n", client_sock);
                 sendToClient(client_sock, "status~0~Wrong Room Code");
                 destroyCmd(cmdArr);
                 close(client_sock);
                 pthread_exit(NULL);
             } else if (code == -2) {
-                printf("[-] Room is full! sockfd = %d\n", client_sock);
+                printf("[ROOM_MANAGEMENT] [WARN] Room is full! sockfd = %d\n", client_sock);
                 sendToClient(client_sock, "status~0~Room is full");
                 destroyCmd(cmdArr);
                 close(client_sock);
@@ -97,13 +97,13 @@ void *roomManagement(void *arguments) {
         case WATCH:
             break;
         default:
-            printf("[-] Unrecognized command %s\n", cmdArr[0]);
+            printf("[ROOM_MANAGEMENT] [WARN] Unrecognized command %s\n", cmdArr[0]);
             sendToClient(client_sock, "status~0~Unrecognized command");
             destroyCmd(cmdArr);
             close(client_sock);
             pthread_exit(NULL);
     }
-    printf("[~] Close thread\n");
+    printf("[ROOM_MANAGEMENT] [INFO] Close thread\n");
     pthread_exit(NULL);
 }
 
@@ -121,17 +121,17 @@ int main(int argc, char **argv) {
 
 
     if (argc != 2) {
-        printf("Error Usage: run application with a port argument");
+        printf("[MAIN] [ERROR] run application with a port argument");
         exit(1);
     }
     port = strtol(argv[1], NULL, 10);
     if (port <= 0) {
-        printf("Error Usage: port must be int > 0");
+        printf("[MAIN] [ERROR] port must be int > 0");
         exit(1);
     }
 
     if ((server_sock = socket(AF_INET, SOCK_STREAM, 0)) == -1) { /* calls socket() */
-        printf("[-] socket() error\n");
+        printf("[MAIN] [ERROR] socket() error\n");
         return 0;
     }
 
@@ -141,12 +141,12 @@ int main(int argc, char **argv) {
     server.sin_addr.s_addr = htonl(INADDR_ANY); /* INADDR_ANY puts your IP address automatically */
 
     if (bind(server_sock, (struct sockaddr *) &server, sizeof(server)) == -1) {
-        perror("\n[-]Error: ");
+        perror("\n[MAIN] [ERROR]Error: ");
         return 0;
     }
-    printf("[+] Server is running at port %d\n", port);
+    printf("[INFO] Server is running at port %d\n", port);
     if (listen(server_sock, BACKLOG) == -1) {
-        perror("\n[-]Error: ");
+        perror("\n[MAIN] [ERROR]Error: ");
         return 0;
     }
     pthread_t tid;
@@ -157,14 +157,14 @@ int main(int argc, char **argv) {
 
 
     while (1) {
-        printf("[+] Listening...\n");
+        printf("[MAIN] [INFO] Listening...\n");
         int client_sock = accept(server_sock, NULL, NULL);
-        printf("[+] Connection accepted\n");
+        printf("[MAIN] [INFO] Connection accepted\n");
         if (client_sock < 0) {
-            printf("[-] Server acccept failed...\n");
+            printf("[MAIN] [INFO] Server acccept failed...\n");
             exit(0);
         } else
-            printf("[+] Server acccept the client\n");
+            printf("[MAIN] [INFO] Server acccept the client\n");
         Args *args = (Args *) malloc(sizeof(Args));
         args->manager = manager;
         args->client_sockfd = client_sock;

@@ -4,7 +4,7 @@
 
 #ifndef SERVER_GAME_MANAGER_H
 #define SERVER_GAME_MANAGER_H
-#define MAX_ROOM 2
+#define MAX_ROOM 10
 
 #include <stdbool.h>
 #include "game_logic.h"

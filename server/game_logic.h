@@ -45,13 +45,13 @@ Move *newMove(int x, int y);
 
 Player *newPlayer(int sockfd, char *name, bool isTurned, char label);
 
-GameBoard *newGameBoard(Player *player1, int size);
+GameBoard *newGameBoard(int size);
 
-void remakeGameBroad(GameBoard *gameBoard);
+void remakeGameBoard(GameBoard *gameBoard);
 
 bool isWin(GameBoard *gameBoard, Move *move, char label);
 
-void addPlayer2(GameBoard *gameBoard, Player *player2);
+void addPlayer(GameBoard *gameBoard, Player *player);
 
 void makeMove(GameBoard *gameBoard, Move *move, Player *player);
 
@@ -66,3 +66,11 @@ char *serializeBoard(char label, char opLabel, int size, char board[MAX_BOARD_SI
 int getNumPlayer(GameBoard *gameBoard);
 
 void freeGameBoard(GameBoard *gameBoard);
+
+void freePlayer(Player *player);
+
+int getTurnedPlayer(GameBoard *gameBoard);
+
+Player *getAvailablePlayer(GameBoard *gameBoard);
+
+void printBoard(GameBoard *gameBoard);
