@@ -44,6 +44,11 @@ typedef struct DoneCmd_ {
     bool is_winner;
 } DoneCmd;
 
+// typedef struct InfoCmd_ {
+//     char winner[MAXMSG];
+//     bool is_winner;
+// } InfoCmd;
+
 typedef struct CmdValue_ {
     Command type;
     union {

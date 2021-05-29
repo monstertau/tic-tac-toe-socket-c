@@ -80,5 +80,3 @@ void printBoard(GameBoard *gameBoard);
 int getNumWatcher(GameBoard *GameBoard);
 
 void addWatcher(GameBoard *gameBoard, Player *player);
-
-char *currentBoard(int size, char board[MAX_BOARD_SIZE][MAX_BOARD_SIZE]);

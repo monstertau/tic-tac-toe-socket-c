@@ -11,6 +11,7 @@ typedef enum {
     CREATE,
     JOIN,
     WATCH,
+    INFO,
     UNRECOGNIZED
 } Command;
 
@@ -30,12 +31,16 @@ typedef struct WatchCmd_ {
     int roomCode;
 } WatchCmd;
 
+typedef struct InfoCmd_ {
+} InfoCmd;
+
 typedef struct CmdValue_ {
     Command type;
     union {
         CreateCmd createCmd;
         JoinCmd joinCmd;
         WatchCmd watchCmd;
+        InfoCmd infoCmd;
     };
 } CmdValue;
 

@@ -46,6 +46,8 @@ CmdValue getCommand(char **cmdArr) {
     } else if (strcmp(cmdArr[0], "watch") == 0) {
         cmdValue.type = WATCH;
         cmdValue.watchCmd = newWatchCommand(cmdArr);
+    } else if (strcmp(cmdArr[0], "info") == 0) { 
+        cmdValue.type = INFO;
     } else {
         cmdValue.type = UNRECOGNIZED;
     }

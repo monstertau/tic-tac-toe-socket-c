@@ -13,6 +13,8 @@
 #define BUFF_SIZE 1024
 
 void handleContinue(int sock);
+void listRoom(int client_sock);
+char *requestGetListRoom();
 
 int main() {
     int client_sock;
@@ -42,17 +44,21 @@ int main() {
 
     int c = 0;
 
-    printf("1. CREATE NEW GAME\n");
-    printf("2. JOIN GAME\n");
-    printf("3. WATCH GAME\n");
-    printf("4. EXIT\n");
-    printf("Your choice (1-4):");
-    scanf("%d", &c);
-    getchar();
+    
     char name[BUFF_SIZE];
     int boardSize = 3;
     char roomCode[BUFF_SIZE];
     int roomCodeInt = 0;
+    // while (1)
+    // {
+    printf("\n1. CREATE NEW GAME\n");
+    printf("2. JOIN GAME\n");
+    // printf("3. LIST GAME\n");
+    printf("3. WATCH GAME\n");
+    printf("4. EXIT\n");
+    printf("Your choice (1-5): ");
+    scanf("%d", &c);
+    getchar();
     switch (c) {
         case 1:
             memset(buff, '\0', BUFF_SIZE);
@@ -80,6 +86,8 @@ int main() {
             strcat(buff, name);
             strcat(buff, "~");
 
+            listRoom(client_sock);
+
             memset(roomCode, '\0', BUFF_SIZE);
             printf("\nInsert room code:");
             scanf("%d", &roomCodeInt);
@@ -91,12 +99,13 @@ int main() {
             strcpy(buff, "watch");
             strcat(buff, "~");
             printf("\nInsert name:");
-
             memset(name, '\0', BUFF_SIZE);
             fgets(name, BUFF_SIZE, stdin);
             name[strcspn(name, "\n")] = '\0';
             strcat(buff, name);
             strcat(buff, "~");
+
+            listRoom(client_sock);
 
             memset(roomCode, '\0', BUFF_SIZE);
             printf("\nInsert room code:");
@@ -107,11 +116,15 @@ int main() {
         default:
             break;
     }
+    //     break;
+    // }
     //Step 4: Communicate with server
 
     msg_len = strlen(buff);
 
     bytes_sent = send(client_sock, buff, msg_len, 0);
+    printf("hererererere\n");
+    printf("%d\n",bytes_sent);
     if (bytes_sent < 0)
         perror("\nError: ");
     printf("[~] Wait for server to response...\n");
@@ -186,4 +199,29 @@ void handleContinue(int sock) {
     } else {
         send(sock, "1", strlen("1"), 0);
     }
+}
+
+void listRoom(int client_sock){
+    char lstRoom[BUFF_SIZE] = {0};
+
+    int bytes_sent = send(client_sock, "info", strlen("info"), 0);
+    if(bytes_sent <= 0 ){
+        perror("\n Error");
+    }
+    int bytes_received = recv(client_sock, lstRoom, BUFF_SIZE, 0);
+    lstRoom[strcspn(lstRoom, "\n")] = 0;
+    // listRoom(lstRoom);
+
+    printf("-----------------------------\n");
+    printf("List room: \n");
+    printf("Id       Size Player Audience\n");
+    char *ch;
+    ch = strtok(lstRoom,"~");
+    ch = strtok(NULL,"~");
+    while (ch != NULL)
+    {
+        printf("%s\n",ch);
+        ch = strtok(NULL,"~");
+    }
+    
 }

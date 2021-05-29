@@ -147,7 +147,7 @@ void *handleGameBoard(void *arguments) {
             int dropPlayer;
             for (int i = 0; i < MAX_PLAYER; i++) {
                 bool is_winner = gameBoard->playerList[i]->label == gameBoard->winner;
-                char msg[BUFF_SIZE];
+                char msg[BUFF_SIZE] = {0};
                 sprintf(msg, "done~%d~%s", is_winner,
                         (is_winner ? gameBoard->playerList[i]->name : gameBoard->playerList[(i + 1) % 2]->name));
                 status = send(gameBoard->playerList[i]->sockfd, msg, BUFF_SIZE, MSG_NOSIGNAL);
@@ -155,7 +155,7 @@ void *handleGameBoard(void *arguments) {
             }
             // Ask to continue
             for (int i = 0; i < MAX_PLAYER; i++) {
-                char buff[BUFF_SIZE];
+                char buff[BUFF_SIZE] = {0};
                 recv(gameBoard->playerList[i]->sockfd, buff, BUFF_SIZE, 0);
                 printf("Return %s %d\n", buff, strcmp(buff, "1"));
                 if (strcmp(buff, "1") == 0)
@@ -335,6 +335,7 @@ int requestJoinRoom(int code, char *name, int sockfd, GameManager *manager) {
 }
 
 int requestWatchRoom(int code,char* name, int sockfd, GameManager *manager){
+    // pthread_mutex_lock(&manager->managerMutex);
     int j = -1;
     for (int i = 0; i < MAX_ROOM; i++) {
         if(manager->RoomGameList[i] == NULL || manager->RoomGameList[i]->roomID != code)
@@ -353,3 +354,22 @@ int requestWatchRoom(int code,char* name, int sockfd, GameManager *manager){
     }
     return j;
 }
+
+char *getListRoom(GameManager *manager){
+    // char tmp
+    char *lstMsg = (char *) malloc(sizeof(char) * BUFF_SIZE);
+    strcat(lstMsg,"List~");
+    for (int i = 0; i < MAX_ROOM; i++){
+        char tmp[100];
+        GameBoard *gb = manager->RoomGameList[i];
+        if(gb != NULL){
+            sprintf(tmp,"%d %d %d/%d %d/%d",gb->roomID, gb->size, getNumPlayer(gb), MAX_PLAYER, getNumWatcher(gb), MAX_WATCHER); //id size player/max wacher/max
+            // printf(tmp);
+            strcat(lstMsg,tmp);
+            strcat(lstMsg,"~");
+        }
+    }
+    printf(lstMsg);
+    printf("\n");
+    return lstMsg;
+} 

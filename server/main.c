@@ -44,9 +44,11 @@ void *roomManagement(void *arguments) {
 
     int byte_recv;
     char buff[BUFF_SIZE];
-    memset(buff, 0, BUFF_SIZE);
-
+     
     printf("[ROOM_MANAGEMENT] [INFO] Created thread for client sock id = %d\n", client_sock);
+    while (1)
+    {
+    memset(buff, 0, BUFF_SIZE);
     byte_recv = recv(client_sock, buff, BUFF_SIZE, 0);
     if (byte_recv < 0) {
         perror("[ROOM_MANAGEMENT] [ERROR] Read error");
@@ -115,12 +117,19 @@ void *roomManagement(void *arguments) {
             char *sendBoard = serializeBoard('-','-',gameBoard->size,gameBoard->board);
             int status = send(client_sock, sendBoard, strlen(sendBoard), MSG_NOSIGNAL);
             break;
+        case INFO:
+            char *sendListBoard = getListRoom(manager);
+            send(client_sock, sendListBoard, strlen(sendListBoard), MSG_NOSIGNAL);
+            continue;
+            break;
         default:
             printf("[ROOM_MANAGEMENT] [WARN] Unrecognized command %s\n", cmdArr[0]);
             sendToClient(client_sock, "status~0~Unrecognized command");
             destroyCmd(cmdArr);
             close(client_sock);
             pthread_exit(NULL);
+    }
+    break;
     }
     printf("[ROOM_MANAGEMENT] [INFO] Close thread\n");
     pthread_exit(NULL);
