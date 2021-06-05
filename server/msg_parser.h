@@ -12,6 +12,8 @@ typedef enum {
     JOIN,
     WATCH,
     INFO,
+    MOVING,
+    CHAT,
     UNRECOGNIZED
 } Command;
 
@@ -34,13 +36,24 @@ typedef struct WatchCmd_ {
 typedef struct InfoCmd_ {
 } InfoCmd;
 
+typedef struct MoveCmd_ {
+    int x;
+    int y;
+} MoveCmd;
+
+typedef struct ChatCmd_ {
+    char chatMsg[MAXCMDLENGTH];
+} ChatCmd;
+
 typedef struct CmdValue_ {
     Command type;
     union {
         CreateCmd createCmd;
         JoinCmd joinCmd;
         WatchCmd watchCmd;
+        MoveCmd moveCmd;
         InfoCmd infoCmd;
+        ChatCmd chatCmd;
     };
 } CmdValue;
 
@@ -55,3 +68,7 @@ CreateCmd newCreateCommand(char **cmdArr);
 JoinCmd newJoinCommand(char **cmdArr);
 
 WatchCmd newWatchCommand(char **cmdArr);
+
+MoveCmd newMoveCommand(char **cmdArr);
+
+ChatCmd newChatCommand(char **cmdArr);

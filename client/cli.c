@@ -9,7 +9,7 @@
 #include "msg_parser.h"
 
 #define SERVER_ADDR "127.0.0.1"
-#define SERVER_PORT 8081
+#define SERVER_PORT 8080
 #define BUFF_SIZE 1024
 
 void handleContinue(int sock);
@@ -215,6 +215,8 @@ void listRoom(int client_sock){
     printf("-----------------------------\n");
     printf("List room: \n");
     printf("Id       Size Player Audience\n");
+    char **cmdArr = parseCmd(lstRoom);
+    CmdValue cmdValue = getCommand(cmdArr);
     char *ch;
     ch = strtok(lstRoom,"~");
     ch = strtok(NULL,"~");

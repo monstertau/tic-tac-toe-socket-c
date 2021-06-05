@@ -46,8 +46,14 @@ CmdValue getCommand(char **cmdArr) {
     } else if (strcmp(cmdArr[0], "watch") == 0) {
         cmdValue.type = WATCH;
         cmdValue.watchCmd = newWatchCommand(cmdArr);
-    } else if (strcmp(cmdArr[0], "info") == 0) { 
+    } else if (strcmp(cmdArr[0], "info") == 0) {
         cmdValue.type = INFO;
+    } else if (strcmp(cmdArr[0], "moving") == 0) {
+        cmdValue.type = MOVING;
+        cmdValue.moveCmd = newMoveCommand(cmdArr);
+    } else if (strcmp(cmdArr[0], "chat") == 0) {
+        cmdValue.type = CHAT;
+        cmdValue.chatCmd = newChatCommand(cmdArr);
     } else {
         cmdValue.type = UNRECOGNIZED;
     }
@@ -74,7 +80,7 @@ JoinCmd newJoinCommand(char **cmdArr) {
     return joinCmd;
 }
 
-WatchCmd newWatchCommand(char **cmdArr){
+WatchCmd newWatchCommand(char **cmdArr) {
     char name[50];
     strcpy(name, cmdArr[1]);
     int code = strtol(cmdArr[2], NULL, 10);
@@ -82,4 +88,18 @@ WatchCmd newWatchCommand(char **cmdArr){
     strcpy(watchCmd.name, name);
     watchCmd.roomCode = code;
     return watchCmd;
+}
+
+MoveCmd newMoveCommand(char **cmdArr) {
+    MoveCmd moveCmd;
+    moveCmd.x = strtol(cmdArr[1], NULL, 10);
+    moveCmd.y = strtol(cmdArr[2], NULL, 10);
+    return moveCmd;
+}
+
+ChatCmd newChatCommand(char **cmdArr) {
+    ChatCmd chatCmd;
+    memset(chatCmd.chatMsg, 0, MAXCMDLENGTH);
+    strcpy(chatCmd.chatMsg, cmdArr[1]);
+    return chatCmd;
 }

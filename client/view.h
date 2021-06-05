@@ -8,6 +8,7 @@
 #endif //CLIENT_VIEW_H
 
 #include "ncurses.h"
+#include "msg_parser.h"
 
 #define MAX_MSG_LEN 100
 #define GAME_TITLE " Game Board "
@@ -16,7 +17,7 @@
 #define LABEL_TITLE " Labels "
 #define COMMAND_TITLE " Game Board "
 #define MAX_BOARD_SIZE 16
-#define MAX_MENU 4
+#define MAX_MENU 6
 #define MENU_TITLE " Tic Tac Toe Online Game "
 
 typedef struct GameScreen_ {
@@ -55,8 +56,9 @@ typedef struct ChatMessage_ {
 
 extern ChatInfo chatInfo;
 extern ChatMessage *chatMessageHead;
+extern char lastMessage[MAX_MSG_LEN];
 
-void insertChatMessage(int whoami, char *msg);
+void drawChatMessage(int whoami, char *msg);
 
 GameBoardInfo newGameBoardInfo(int xMax, int yMax, int gameSize);
 
@@ -68,7 +70,7 @@ void drawLightTitle(WINDOW *window, char *title);
 WINDOW *newSubWindow(char *title, int widthX, int heightY, int startX, int startY, bool inTab);
 
 
-WINDOW *drawBanner(int xMax);
+WINDOW *drawBanner(int gameCode, int xMax);
 
 WINDOW *newGameWindow(int xMax, int yMax, bool inTab);
 
@@ -80,7 +82,7 @@ WINDOW *newLabelWindow(int xMax, int yMax, bool inTab);
 
 WINDOW *newCommandWindow(int xMax, int yMax, bool inTab);
 
-GameScreen *newGameScreen(int xMax, int yMax);
+GameScreen *newGameScreen(int gameCode, int xMax, int yMax);
 
 void setSystemMessage(GameScreen *screen, char *msg);
 
@@ -107,3 +109,7 @@ void newMenuWindow(int *choice, int *xMax, int *yMax);
 WINDOW *newStatusWindow(char *title, char *label, bool isError);
 
 char *inputNewBox(char *title, char *label);
+
+void newListRoomWindow(InfoCmd *infoCmd);
+
+void addChatMessage(ChatRecv *chatRecv);

@@ -14,6 +14,8 @@ typedef enum {
     MOVING,
     UPDATE,
     DONE,
+    LIST,
+    CHAT,
     UNRECOGNIZED
 } Command;
 typedef enum {
@@ -44,10 +46,20 @@ typedef struct DoneCmd_ {
     bool is_winner;
 } DoneCmd;
 
-// typedef struct InfoCmd_ {
-//     char winner[MAXMSG];
-//     bool is_winner;
-// } InfoCmd;
+typedef struct InfoCmd_ {
+    char *roomID;
+    char *size;
+    char *playerInfo;
+    char *watcherInfo;
+    struct InfoCmd_ *next;
+} InfoCmd;
+typedef struct ChatRecv_ {
+    char *message;
+    struct ChatRecv_ *next;
+} ChatRecv;
+typedef struct ChatCmd_ {
+    ChatRecv *chatRecv;
+} ChatCmd;
 
 typedef struct CmdValue_ {
     Command type;
@@ -56,6 +68,8 @@ typedef struct CmdValue_ {
         MovingCmd movingCmd;
         UpdateCmd updateCmd;
         DoneCmd doneCmd;
+        InfoCmd *infoCmd;
+        ChatCmd chatCmd;
     };
 } CmdValue;
 
@@ -72,3 +86,7 @@ UpdateCmd newUpdateCommand(char **cmdArr);
 MovingCmd newMovingCommand(char **cmdArr);
 
 DoneCmd newDoneCommand(char **cmdArr);
+
+InfoCmd *newListRoomCommand(char **cmdArr);
+
+ChatCmd newChatCommand(char **cmdArr);

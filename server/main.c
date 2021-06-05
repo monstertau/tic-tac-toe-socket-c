@@ -44,92 +44,92 @@ void *roomManagement(void *arguments) {
 
     int byte_recv;
     char buff[BUFF_SIZE];
-     
+
     printf("[ROOM_MANAGEMENT] [INFO] Created thread for client sock id = %d\n", client_sock);
-    while (1)
-    {
-    memset(buff, 0, BUFF_SIZE);
-    byte_recv = recv(client_sock, buff, BUFF_SIZE, 0);
-    if (byte_recv < 0) {
-        perror("[ROOM_MANAGEMENT] [ERROR] Read error");
-        close(client_sock);
-        pthread_exit(NULL);
-    } else if (byte_recv == 0) {
-        printf("[ROOM_MANAGEMENT] [INFO] Connection closed.\n");
-        pthread_exit(NULL);
-    }
-
-
-    // parse buffer to command array with character ~ between each
-    char **cmdArr = parseCmd(buff);
-    // get command from each command array
-    CmdValue cmdValue = getCommand(cmdArr);
-    int code;
-    switch (cmdValue.type) {
-        case CREATE:
-            code = getFreeRoom(manager, cmdValue.createCmd.boardSize, cmdValue.createCmd.name, client_sock);
-            if (code == -1) {
-                printf("[ROOM_MANAGEMENT] [WARN] Full Room to create! sockfd = %d\n", client_sock);
-                sendToClient(client_sock, "status~0~Full Room to create");
-                destroyCmd(cmdArr);
-                close(client_sock);
-                pthread_exit(NULL);
-            }
-            char s[BUFF_SIZE];
-            sprintf(s, "status~1~Create Room Successfully~%d", code);
-            sendToClient(client_sock, s);
-            break;
-        case JOIN:
-            code = requestJoinRoom(cmdValue.joinCmd.roomCode, cmdValue.joinCmd.name, client_sock, manager);
-            if (code == -1) {
-                printf("[ROOM_MANAGEMENT] [WARN] Wrong Room Code! sockfd = %d\n", client_sock);
-                sendToClient(client_sock, "status~0~Wrong Room Code");
-                destroyCmd(cmdArr);
-                close(client_sock);
-                pthread_exit(NULL);
-            } else if (code == -2) {
-                printf("[ROOM_MANAGEMENT] [WARN] Room is full! sockfd = %d\n", client_sock);
-                sendToClient(client_sock, "status~0~Room is full");
-                destroyCmd(cmdArr);
-                close(client_sock);
-                pthread_exit(NULL);
-            }
-            sendToClient(client_sock, "status~1~Join room successfully");
-            break;
-        case WATCH:
-            code = requestWatchRoom(cmdValue.watchCmd.roomCode,cmdValue.watchCmd.name, client_sock, manager);
-            if(code == -1){
-                printf("[ROOM_MANAGEMENT] [WARN] Wrong Room Code! sockfd = %d\n", client_sock);
-                sendToClient(client_sock, "status~0~Wrong Room Code");
-                destroyCmd(cmdArr);
-                close(client_sock);
-                pthread_exit(NULL);
-            } else if(code == -2){
-                printf("[ROOM_MANAGEMENT] [WARN] Room is full! sockfd = %d\n", client_sock);
-                sendToClient(client_sock, "status~0~Room is full");
-                destroyCmd(cmdArr);
-                close(client_sock);
-                pthread_exit(NULL);
-            }
-            sendToClient(client_sock,"status~1~Watch room successfully");
-            sleep(0.5);
-            GameBoard *gameBoard = manager->RoomGameList[code];
-            char *sendBoard = serializeBoard('-','-',gameBoard->size,gameBoard->board);
-            int status = send(client_sock, sendBoard, strlen(sendBoard), MSG_NOSIGNAL);
-            break;
-        case INFO:
-            char *sendListBoard = getListRoom(manager);
-            send(client_sock, sendListBoard, strlen(sendListBoard), MSG_NOSIGNAL);
-            continue;
-            break;
-        default:
-            printf("[ROOM_MANAGEMENT] [WARN] Unrecognized command %s\n", cmdArr[0]);
-            sendToClient(client_sock, "status~0~Unrecognized command");
-            destroyCmd(cmdArr);
+    while (1) {
+        memset(buff, 0, BUFF_SIZE);
+        byte_recv = recv(client_sock, buff, BUFF_SIZE, 0);
+        if (byte_recv < 0) {
+            perror("[ROOM_MANAGEMENT] [ERROR] Read error");
             close(client_sock);
             pthread_exit(NULL);
-    }
-    break;
+        } else if (byte_recv == 0) {
+            printf("[ROOM_MANAGEMENT] [INFO] Connection closed.\n");
+            pthread_exit(NULL);
+        }
+
+
+        // parse buffer to command array with character ~ between each
+        char **cmdArr = parseCmd(buff);
+        // get command from each command array
+        CmdValue cmdValue = getCommand(cmdArr);
+        int code;
+        switch (cmdValue.type) {
+            case CREATE:
+                code = getFreeRoom(manager, cmdValue.createCmd.boardSize, cmdValue.createCmd.name, client_sock);
+                if (code == -1) {
+                    printf("[ROOM_MANAGEMENT] [WARN] Full Room to create! sockfd = %d\n", client_sock);
+                    sendToClient(client_sock, "status~0~Full Room to create");
+                    destroyCmd(cmdArr);
+                    close(client_sock);
+                    pthread_exit(NULL);
+                }
+                char s[BUFF_SIZE];
+                sprintf(s, "status~1~Create Room Successfully~%d", code);
+                sendToClient(client_sock, s);
+                break;
+            case JOIN:
+                code = requestJoinRoom(cmdValue.joinCmd.roomCode, cmdValue.joinCmd.name, client_sock, manager);
+                if (code == -1) {
+                    printf("[ROOM_MANAGEMENT] [WARN] Wrong Room Code! sockfd = %d\n", client_sock);
+                    sendToClient(client_sock, "status~0~Wrong Room Code");
+                    destroyCmd(cmdArr);
+                    close(client_sock);
+                    pthread_exit(NULL);
+                } else if (code == -2) {
+                    printf("[ROOM_MANAGEMENT] [WARN] Room is full! sockfd = %d\n", client_sock);
+                    sendToClient(client_sock, "status~0~Room is full");
+                    destroyCmd(cmdArr);
+                    close(client_sock);
+                    pthread_exit(NULL);
+                }
+                sendToClient(client_sock, "status~1~Join room successfully");
+                break;
+            case WATCH:
+                code = requestWatchRoom(cmdValue.watchCmd.roomCode, cmdValue.watchCmd.name, client_sock, manager);
+                if (code == -1) {
+                    printf("[ROOM_MANAGEMENT] [WARN] Wrong Room Code! sockfd = %d\n", client_sock);
+                    sendToClient(client_sock, "status~0~Wrong Room Code");
+                    destroyCmd(cmdArr);
+                    close(client_sock);
+                    pthread_exit(NULL);
+                } else if (code == -2) {
+                    printf("[ROOM_MANAGEMENT] [WARN] Room is full! sockfd = %d\n", client_sock);
+                    sendToClient(client_sock, "status~0~Room is full");
+                    destroyCmd(cmdArr);
+                    close(client_sock);
+                    pthread_exit(NULL);
+                }
+                sendToClient(client_sock, "status~1~Watch room successfully");
+                sleep(1);
+                GameBoard *gameBoard = manager->RoomGameList[code];
+                char *sendBoard = serializeBoard('-', '-', gameBoard->size, gameBoard->board);
+                int status = send(client_sock, sendBoard, strlen(sendBoard), MSG_NOSIGNAL);
+                break;
+            case INFO: {
+                char *sendListBoard = getListRoom(manager);
+                send(client_sock, sendListBoard, strlen(sendListBoard), MSG_NOSIGNAL);
+                continue;
+                break;
+            }
+            default:
+                printf("[ROOM_MANAGEMENT] [WARN] Unrecognized command %s\n", cmdArr[0]);
+                sendToClient(client_sock, "status~0~Unrecognized command");
+                destroyCmd(cmdArr);
+                close(client_sock);
+                pthread_exit(NULL);
+        }
+        break;
     }
     printf("[ROOM_MANAGEMENT] [INFO] Close thread\n");
     pthread_exit(NULL);

@@ -43,6 +43,8 @@ GameBoard *newGameBoard(int size) {
     }
     game->roomID = generateRoomCode();
     game->winner = 0;
+    game->hasUpdate = false;
+    game->chatMessage = NULL;
     for (int i = 0; i < MAX_BOARD_SIZE; i++) {
         for (int j = 0; j < MAX_BOARD_SIZE; j++) {
             game->board[i][j] = '\0';
@@ -67,9 +69,9 @@ void addPlayer(GameBoard *gameBoard, Player *player) {
     }
 }
 
-void addWatcher(GameBoard *gameBoard, Player *player){
-    for(int i=0;i<MAX_WATCHER;i++){
-        if(gameBoard->watcherList[i] == NULL){
+void addWatcher(GameBoard *gameBoard, Player *player) {
+    for (int i = 0; i < MAX_WATCHER; i++) {
+        if (gameBoard->watcherList[i] == NULL) {
             gameBoard->watcherList[i] = player;
             break;
         }
@@ -206,10 +208,10 @@ int getNumPlayer(GameBoard *gameBoard) {
     return j;
 }
 
-int getNumWatcher(GameBoard *GameBoard){
+int getNumWatcher(GameBoard *GameBoard) {
     int j = 0;
-    for(int i = 0; i < MAX_WATCHER; i++ ){
-        if(GameBoard->watcherList[i] != NULL)
+    for (int i = 0; i < MAX_WATCHER; i++) {
+        if (GameBoard->watcherList[i] != NULL)
             j++;
     }
     return j;
@@ -227,7 +229,7 @@ void freeGameBoard(GameBoard *gameBoard) {
             gameBoard->playerList[i] = NULL;
         }
     }
-    for (int i = 0; i < MAX_WATCHER; i++){
+    for (int i = 0; i < MAX_WATCHER; i++) {
         if (gameBoard->watcherList[i] != NULL) {
             freePlayer(gameBoard->watcherList[i]);
             gameBoard->watcherList[i] = NULL;
@@ -272,4 +274,21 @@ Player *getAvailablePlayer(GameBoard *gameBoard) {
         }
     }
     return player;
+}
+
+char *serializeChat(GameBoard *gameBoard) {
+    char *buff = (char *) malloc(sizeof(char) * MAX_BUFF_MSG);
+    memset(buff, 0, MAX_BUFF_MSG);
+    strcpy(buff, "chat~");
+    ChatMessage *tmp = gameBoard->chatMessage;
+    while (1) {
+        if (tmp == NULL) {
+            break;
+        }
+        strcat(buff, tmp->message);
+        strcat(buff, "~");
+        tmp = tmp->next;
+    }
+    printf("send chat%s\n",buff);
+    return buff;
 }

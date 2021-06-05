@@ -46,10 +46,31 @@ CmdValue getCommand(char **cmdArr) {
     } else if (strcmp(cmdArr[0], "done") == 0) {
         cmdValue.type = DONE;
         cmdValue.doneCmd = newDoneCommand(cmdArr);
+    } else if (strcmp(cmdArr[0], "list") == 0) {
+        cmdValue.type = LIST;
+        cmdValue.infoCmd = newListRoomCommand(cmdArr);
+    } else if (strcmp(cmdArr[0], "chat") == 0) {
+        cmdValue.type = CHAT;
+        cmdValue.chatCmd = newChatCommand(cmdArr);
     } else {
         cmdValue.type = UNRECOGNIZED;
     }
     return cmdValue;
+}
+
+InfoCmd *newListRoomCommand(char **cmdArr) {
+    InfoCmd *infoCmdHead = NULL;
+    int i = 1;
+    while (strlen(cmdArr[i]) != 0) {
+        InfoCmd *newInfoCmd = (InfoCmd *) malloc(sizeof(InfoCmd));
+        newInfoCmd->roomID = cmdArr[i++];
+        newInfoCmd->size = cmdArr[i++];
+        newInfoCmd->playerInfo = cmdArr[i++];
+        newInfoCmd->watcherInfo = cmdArr[i++];
+        newInfoCmd->next = infoCmdHead;
+        infoCmdHead = newInfoCmd;
+    }
+    return infoCmdHead;
 }
 
 StatusCmd newStatusCommand(char **cmdArr) {
@@ -96,4 +117,18 @@ DoneCmd newDoneCommand(char **cmdArr) {
     doneCmd.is_winner = (strcmp(cmdArr[1], "1") == 0);
     strcpy(doneCmd.winner, cmdArr[2]);
     return doneCmd;
+}
+
+ChatCmd newChatCommand(char **cmdArr) {
+    ChatCmd chatCmd;
+    chatCmd.chatRecv = NULL;
+    int i = 1;
+    while (strlen(cmdArr[i]) > 0) {
+        ChatRecv *chatRecv = (ChatRecv *) malloc(sizeof(ChatRecv));
+        chatRecv->message = cmdArr[i];
+        chatRecv->next = chatCmd.chatRecv;
+        chatCmd.chatRecv = chatRecv;
+        i++;
+    }
+    return chatCmd;
 }

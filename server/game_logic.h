@@ -13,6 +13,7 @@
 #define MAX_BOARD_SIZE 16
 #define MAX_PLAYER 2
 #define MAX_WATCHER 5
+#define MAX_BUFF_MSG 512
 #endif //SERVER_GAME_LOGIC_H
 struct Move_ {
     int x;
@@ -28,6 +29,10 @@ struct Player_ {
 };
 typedef struct Player_ Player;
 
+typedef struct ChatMessage_ {
+    char *message;
+    struct ChatMessage_ *next;
+} ChatMessage;
 
 struct GameBoard_ {
     int roomID;
@@ -38,6 +43,8 @@ struct GameBoard_ {
     Player *playerList[MAX_PLAYER];
     Player *watcherList[MAX_WATCHER];
     char winner;
+    bool hasUpdate;
+    ChatMessage *chatMessage;
 };
 typedef struct GameBoard_ GameBoard;
 
@@ -80,3 +87,5 @@ void printBoard(GameBoard *gameBoard);
 int getNumWatcher(GameBoard *GameBoard);
 
 void addWatcher(GameBoard *gameBoard, Player *player);
+
+char* serializeChat(GameBoard *gameBoard);

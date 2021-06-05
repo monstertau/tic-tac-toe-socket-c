@@ -5,12 +5,14 @@
 #include <string.h>
 #include <malloc.h>
 #include <unistd.h>
+#include <sys/socket.h>
 #include "view.h"
 
 ChatInfo chatInfo;
 ChatMessage *chatMessageHead = NULL;
+char lastMessage[MAX_MSG_LEN] = {0};
 
-void insertChatMessage(int whoami, char *msg) {
+void drawChatMessage(int whoami, char *msg) {
     ChatMessage *chatMsg = (ChatMessage *) malloc(sizeof(ChatMessage));
     chatMsg->whoami = whoami;
     char *msgClone = (char *) malloc(sizeof(char) * strlen(msg));
@@ -23,6 +25,25 @@ void insertChatMessage(int whoami, char *msg) {
     chatMsg->message = msgClone;
     chatMsg->next = chatMessageHead;
     chatMessageHead = chatMsg;
+
+}
+
+void addChatMessage(ChatRecv *chatRecv) {
+    chatMessageHead = NULL;
+    ChatRecv *tmp = chatRecv;
+    while (1) {
+        if (tmp == NULL) {
+            break;
+        }
+        ChatMessage *chatMsg = (ChatMessage *) malloc(sizeof(ChatMessage));
+        char *msgClone = (char *) malloc(sizeof(char) * strlen(tmp->message));
+        strcpy(msgClone, tmp->message);
+        chatMsg->message = msgClone;
+        chatMsg->next = chatMessageHead;
+        chatMessageHead = chatMsg;
+
+        tmp = tmp->next;
+    }
 }
 
 GameBoardInfo newGameBoardInfo(int xMax, int yMax, int gameSize) {
@@ -60,30 +81,31 @@ WINDOW *newSubWindow(char *title, int widthX, int heightY, int startX, int start
 }
 
 
-WINDOW *drawBanner(int xMax) {
-    WINDOW *window = newwin(5, xMax, 0, 0);
+WINDOW *drawBanner(int gameCode, int xMax) {
+    WINDOW *window = newwin(6, xMax, 0, 0);
     mvwprintw(window, 0, xMax / 4, "   __  _         __                __           ");
     mvwprintw(window, 1, xMax / 4, "  / /_(_)____   / /_____ ______   / /_____  ___ ");
     mvwprintw(window, 2, xMax / 4, " / __/ / ___/  / __/ __ `/ ___/  / __/ __ \\/ _ \\");
     mvwprintw(window, 3, xMax / 4, "/ /_/ / /__   / /_/ /_/ / /__   / /_/ /_/ /  __/");
     mvwprintw(window, 4, xMax / 4, "\\__/_/\\___/   \\__/\\__,_/\\___/   \\__/\\____/\\___/ ");
+    mvwprintw(window, 5, xMax / 4, "                Game Code: %d", gameCode);
     return window;
 }
 
 WINDOW *newGameWindow(int xMax, int yMax, bool inTab) {
     WINDOW *window = newSubWindow(GAME_TITLE,
-                                  xMax * 3 / 4, yMax - 10, 0, 5, inTab);
+                                  xMax * 3 / 4, yMax - 10, 0, 6, inTab);
     return window;
 }
 
 WINDOW *newSystemWindow(int xMax, int yMax, bool inTab) {
     WINDOW *window = newSubWindow(SYSTEM_TITLE,
-                                  xMax * 1 / 4, 5, xMax * 3 / 4 + 1, 0, inTab);
+                                  xMax * 1 / 4, 6, xMax * 3 / 4 + 1, 0, inTab);
     return window;
 }
 
 WINDOW *newChatWindow(int xMax, int yMax, bool inTab) {
-    WINDOW *window = newSubWindow(CHAT_TITLE, xMax * 1 / 4, yMax - 10, xMax * 3 / 4 + 1, 5, inTab);
+    WINDOW *window = newSubWindow(CHAT_TITLE, xMax * 1 / 4, yMax - 10, xMax * 3 / 4 + 1, 6, inTab);
 
     mvwhline(window, yMax - 20, 2, ACS_HLINE, xMax * 1 / 4 - 4);
     mvwprintw(window, yMax - 20 + 1, 2, "Message: ");
@@ -114,11 +136,11 @@ WINDOW *newCommandWindow(int xMax, int yMax, bool inTab) {
     return window;
 }
 
-GameScreen *newGameScreen(int xMax, int yMax) {
+GameScreen *newGameScreen(int gameCode, int xMax, int yMax) {
     GameScreen *screen = (GameScreen *) malloc(sizeof(GameScreen));
     screen->xMax = xMax;
     screen->yMax = yMax;
-    screen->banner = drawBanner(xMax);
+    screen->banner = drawBanner(gameCode, xMax);
     screen->gameWin = newGameWindow(xMax, yMax, false);
     screen->chatWin = newChatWindow(xMax, yMax, false);
     screen->commandWin = newCommandWindow(xMax, yMax, false);
@@ -244,6 +266,7 @@ int movingGameWindow(GameBoardInfo *gameBoardInfo, GameScreen *gameScreen, GameI
 }
 
 void drawChatDialog(GameScreen *gameScreen) {
+    gameScreen->chatWin = newChatWindow(gameScreen->xMax, gameScreen->yMax, true);
     ChatMessage *chatMsg = chatMessageHead;
     int y = getmaxy(gameScreen->chatWin);
     int i = 0;
@@ -263,7 +286,6 @@ void drawChatDialog(GameScreen *gameScreen) {
 int movingChatWindow(GameScreen *gameScreen, char *msg, int *i) {
     setNormalTitle(gameScreen);
     delwin(gameScreen->chatWin);
-    gameScreen->chatWin = newChatWindow(gameScreen->xMax, gameScreen->yMax, true);
     drawChatDialog(gameScreen);
     mvwprintw(gameScreen->chatWin, chatInfo.yCur, chatInfo.xCur, msg);
     int y, x;
@@ -278,7 +300,8 @@ int movingChatWindow(GameScreen *gameScreen, char *msg, int *i) {
         case 9:
             break;
         case 10:
-            insertChatMessage(0, msg);
+            memset(lastMessage, 0, MAX_MSG_LEN);
+            strcpy(lastMessage, msg);
             memset(msg, 0, MAX_MSG_LEN);
             *i = 0;
             break;
@@ -371,7 +394,8 @@ WINDOW *newStatusWindow(char *title, char *label, bool isError) {
 
 void newMenuWindow(int *choice, int *xMax, int *yMax) {
     WINDOW *menuWin = newDialogWindow(MENU_TITLE, xMax, yMax);
-    char choices[MAX_MENU][40] = {"Start A New Game", "Join An Existing Game", "Game's Rule", "Exit"};
+    char choices[MAX_MENU][40] = {"Start A New Game", "Join An Existing Game", "Watch A Game", "List Game Room",
+                                  "Game Rule", "Exit"};
     while (1) {
         for (int i = 0; i < MAX_MENU; i++) {
             if (*choice == i) {
@@ -400,5 +424,36 @@ void newMenuWindow(int *choice, int *xMax, int *yMax) {
             delwin(menuWin);
             break;
         }
+    }
+}
+
+void newListRoomWindow(InfoCmd *infoCmd) {
+    erase();
+    noecho();
+    curs_set(1);
+    int xMax, yMax;
+    char tmpLabel[MAX_MSG_LEN] = {0};
+    WINDOW *gameWin = newDialogWindow(" List Game Room ", &xMax, &yMax);
+    mvwprintw(gameWin, 5, 5, "Room Code\t\tRoom Size\t\tNo. Player\t\tNo. Watcher");
+    mvwhline(gameWin, 6, 3, ACS_HLINE, xMax - 6);
+    int y = 7;
+    InfoCmd *tmp = infoCmd;
+    while (1) {
+        if (tmp == NULL) {
+            break;
+        }
+        mvwprintw(gameWin, y, 5, "%s\t\t%s\t\t\t%s\t\t\t%s", tmp->roomID, tmp->size, tmp->playerInfo,
+                  tmp->watcherInfo);
+        tmp = tmp->next;
+        y++;
+    }
+    mvwprintw(gameWin, yMax - 2, xMax / 4, "Press Enter to back to Menu...");
+    wrefresh(gameWin);
+    while (1) {
+        int c = wgetch(gameWin);
+        if (c == 10) {
+            break;
+        }
+
     }
 }
