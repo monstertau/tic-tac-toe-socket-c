@@ -20,7 +20,7 @@ void handleContinue(GameScreen *gameScreen, GameInfo *gameInfo, int sock) {
     char *cmd = inputNewBox(" Reminder ", "Do you want to continue? [Y/n]: ");
 
     if (strcmp(cmd, "Y") != 0 && strcmp(cmd, "y") != 0) {
-        send(sock, "0", strlen("0"), 0);
+        close(sock);
         while (1) {
             WINDOW *sttWin = newStatusWindow(" Message ", "Thank you for playing!", true);
             int c = wgetch(sttWin);
@@ -28,11 +28,11 @@ void handleContinue(GameScreen *gameScreen, GameInfo *gameInfo, int sock) {
                 break;
             }
         }
-        close(sock);
+
         endwin();
         exit(1);
     } else {
-        send(sock, "1", strlen("1"), 0);
+        send(sock, "continue", strlen("continue"), 0);
         int yMax, xMax;
         getmaxyx(stdscr, yMax, xMax);
         gameScreen = newGameScreen(gameInfo->gameCode, xMax, yMax);

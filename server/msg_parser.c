@@ -54,6 +54,8 @@ CmdValue getCommand(char **cmdArr) {
     } else if (strcmp(cmdArr[0], "chat") == 0) {
         cmdValue.type = CHAT;
         cmdValue.chatCmd = newChatCommand(cmdArr);
+    } else if (strcmp(cmdArr[0], "continue") == 0) {
+        cmdValue.type = CONTINUE;
     } else {
         cmdValue.type = UNRECOGNIZED;
     }

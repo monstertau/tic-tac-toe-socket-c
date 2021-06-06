@@ -55,9 +55,9 @@ GameBoard *newGameBoard(int size) {
 
 void remakeGameBoard(GameBoard *gameBoard) {
     memset(gameBoard->board, 0, sizeof gameBoard->board); //Clear broad
+    gameBoard->chatMessage = NULL;
+    gameBoard->hasUpdate = false;
     gameBoard->winner = '\0';                             //clear old winner
-    for (int i = 0; i < MAX_PLAYER; i++)
-        gameBoard->playerList[i]->isTurned = !gameBoard->playerList[i]->isTurned; // Change player go first
 }
 
 void addPlayer(GameBoard *gameBoard, Player *player) {
@@ -289,6 +289,6 @@ char *serializeChat(GameBoard *gameBoard) {
         strcat(buff, "~");
         tmp = tmp->next;
     }
-    printf("send chat%s\n",buff);
+    printf("send chat%s\n", buff);
     return buff;
 }

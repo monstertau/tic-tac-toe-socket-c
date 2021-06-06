@@ -158,6 +158,11 @@ void *handleRecvPlayer(void *arguments) {
             gameBoard->hasUpdate = true;
             pthread_cond_broadcast(&gameBoard->gameCond);
             memset(buff, 0, BUFF_SIZE);
+        } else if (cmdValue.type == CONTINUE) {
+            remakeGameBoard(gameBoard);
+            gameBoard->hasUpdate = true;
+            pthread_cond_broadcast(&gameBoard->gameCond);
+            memset(buff, 0, BUFF_SIZE);
         }
 
     }
@@ -277,29 +282,6 @@ void *handleGameBoard(void *arguments) {
                         (is_winner ? gameBoard->playerList[i]->name : gameBoard->playerList[(i + 1) % 2]->name));
                 status = send(gameBoard->playerList[i]->sockfd, msg, BUFF_SIZE, MSG_NOSIGNAL);
 
-            }
-            // Ask to continue
-            for (int i = 0; i < MAX_PLAYER; i++) {
-                char buff[BUFF_SIZE] = {0};
-                recv(gameBoard->playerList[i]->sockfd, buff, BUFF_SIZE, 0);
-                printf("Return %s %d\n", buff, strcmp(buff, "1"));
-                if (strcmp(buff, "1") == 0)
-                    concount++; // check is continue
-                else
-                    dropPlayer = i;
-            }
-            printf("[ROOM %d] [INFO] Number of agree %d\n", gameBoard->roomID, concount);
-            if (concount < MAX_PLAYER) {
-                if (concount == 1) {
-                    char msg[BUFF_SIZE];
-                    sprintf(msg, "status~1~%s is abort", gameBoard->playerList[dropPlayer]->name);
-                    status = send(gameBoard->playerList[(dropPlayer + 1) % 2]->sockfd, msg, strlen(msg), MSG_NOSIGNAL);
-                }
-                break;
-            } else {
-                printf("Remake\n");
-                remakeGameBoard(gameBoard);
-                continue;
             }
         }
 

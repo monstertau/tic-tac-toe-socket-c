@@ -14,6 +14,7 @@ typedef enum {
     INFO,
     MOVING,
     CHAT,
+    CONTINUE,
     UNRECOGNIZED
 } Command;
 
